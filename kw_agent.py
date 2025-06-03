@@ -9,14 +9,14 @@ import numpy as np
 Transition = namedtuple("Transition", ("state", "action", "reward", "next_state", "done"))
 
 class DQN(nn.Module):
-    def __init__(self, obs_size: int, action_size: int):
+    def __init__(self, input_size: int, action_size: int):
         super().__init__()
         # Dynamic hidden sizes based on observation size
         hidden_size1 = 256  # First hidden layer
         hidden_size2 = 128   # Second hidden layer
         
         self.net = nn.Sequential(
-            nn.Linear(obs_size, hidden_size1),
+            nn.Linear(input_size, hidden_size1),
             nn.ReLU(),
             nn.Linear(hidden_size1, hidden_size1),
             nn.ReLU(),
@@ -28,6 +28,47 @@ class DQN(nn.Module):
 
     def forward(self, x):
         return self.net(x)
+    
+class LSTMQNetwork(nn.Module):
+    def __init__(self, input_size: int, action_size: int, hidden_size: int = 256, num_layers: int = 2):
+        super().__init__()
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+        
+        # LSTM layer
+        self.lstm = nn.LSTM(
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            batch_first=True,
+            dropout=0.1 if num_layers > 1 else 0.0
+        )
+        
+        # Output head
+        self.output_head = nn.Sequential(
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
+            nn.Dropout(0.1),
+            nn.Linear(hidden_size, action_size)
+        )
+        
+    def forward(self, x, hidden=None):
+        """
+        x: (batch_size, seq_len, input_size)
+        hidden: tuple of (h_0, c_0) each of shape (num_layers, batch_size, hidden_size)
+        """
+        lstm_out, hidden = self.lstm(x, hidden)
+        # Use the last timestep output
+        last_output = lstm_out[:, -1, :]  # (batch_size, hidden_size)
+        q_values = self.output_head(last_output)
+        return q_values, hidden
+    
+    def init_hidden(self, batch_size, device):
+        """Initialize hidden state"""
+        h_0 = torch.zeros(self.num_layers, batch_size, self.hidden_size).to(device)
+        c_0 = torch.zeros(self.num_layers, batch_size, self.hidden_size).to(device)
+        return (h_0, c_0)
 
 class ReplayBuffer:
     def __init__(self, capacity=int(1e5)):
@@ -43,7 +84,7 @@ class ReplayBuffer:
         return len(self.buffer)
 
 class KWAgent:
-    def __init__(self, n, player_id, lr=3e-4, ucb_c=2.0):
+    def __init__(self, n, player_id, model_type='LSTM', lr=3e-4, ucb_c=2.0):
         self.n = n
         self.player_id = player_id
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -60,8 +101,12 @@ class KWAgent:
             self.action_size = 3      # 2 bits + 1 pass only
         
         # Initialize networks with player-specific action sizes
-        self.policy_net = DQN(self.obs_size, self.action_size).to(self.device)
-        self.target_net = DQN(self.obs_size, self.action_size).to(self.device)
+        if model_type == 'DQN':
+            self.policy_net = DQN(self.obs_size, self.action_size).to(self.device)
+            self.target_net = DQN(self.obs_size, self.action_size).to(self.device)
+        elif model_type == 'LSTM':
+            self.policy_net = LSTMQNetwork(self.obs_size, self.action_size).to(self.device)
+            self.target_net = LSTMQNetwork(self.obs_size, self.action_size).to(self.device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
         
         self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=lr, weight_decay=1e-5)
@@ -73,7 +118,7 @@ class KWAgent:
         self.total_steps = 0  # Total number of actions taken
         
         # Initialize training parameters
-        self.batch_size = 64
+        self.batch_size = 128
         self.gamma = 0.999  # Higher gamma like the original fast-learning code
     
     def select_action(self, state, training=True):
@@ -81,14 +126,17 @@ class KWAgent:
         if not training:
             # During evaluation, use pure exploitation (no exploration)
             with torch.no_grad():
-                state_tensor = torch.FloatTensor(state).unsqueeze(0).to(self.device)
-                q_values = self.policy_net(state_tensor)
+                # Reshape state for LSTM (batch_size=1, sequence_length=1, features)
+                state_tensor = torch.FloatTensor(state).unsqueeze(0).unsqueeze(0).to(self.device)
+                q_values, _ = self.policy_net(state_tensor)
                 return q_values.max(1)[1].item()
         
         # UCB action selection during training
         with torch.no_grad():
-            state_tensor = torch.FloatTensor(state).unsqueeze(0).to(self.device)
-            q_values = self.policy_net(state_tensor).cpu().numpy().flatten()
+            # Reshape state for LSTM (batch_size=1, sequence_length=1, features)
+            state_tensor = torch.FloatTensor(state).unsqueeze(0).unsqueeze(0).to(self.device)
+            q_values, _ = self.policy_net(state_tensor)
+            q_values = q_values.cpu().numpy().flatten()
         
         # Calculate UCB values for each action
         ucb_values = np.zeros(self.action_size)
@@ -141,30 +189,36 @@ class KWAgent:
         batch = Transition(*zip(*transitions))
         
         # Convert to tensors
-        state_batch = torch.FloatTensor(batch.state).to(self.device)
+        state_batch = torch.FloatTensor(batch.state).unsqueeze(1).to(self.device)  # Add sequence dimension
         action_batch = torch.LongTensor(batch.action).unsqueeze(1).to(self.device)
         reward_batch = torch.FloatTensor(batch.reward).unsqueeze(1).to(self.device)
-        next_state_batch = torch.FloatTensor(batch.next_state).to(self.device)
+        next_state_batch = torch.FloatTensor(batch.next_state).unsqueeze(1).to(self.device)  # Add sequence dimension
         done_batch = torch.FloatTensor(batch.done).unsqueeze(1).to(self.device)
         
         # Current Q values
-        current_q_values = self.policy_net(state_batch).gather(1, action_batch)
+        current_q_values, _ = self.policy_net(state_batch)
+        current_q_values = current_q_values.gather(1, action_batch)
         
         # Target Q values (Double DQN)
         with torch.no_grad():
             # Use policy network to select actions
-            next_actions = self.policy_net(next_state_batch).argmax(1, keepdim=True)
+            next_actions, _ = self.policy_net(next_state_batch)
+            next_actions = next_actions.max(1)[1].unsqueeze(1)
+            
             # Use target network to evaluate actions
-            next_q_values = self.target_net(next_state_batch).gather(1, next_actions)
-            target_q_values = reward_batch + (self.gamma * next_q_values * (1 - done_batch))
+            next_q_values, _ = self.target_net(next_state_batch)
+            next_q_values = next_q_values.gather(1, next_actions)
+            
+            # Compute target Q values
+            target_q_values = reward_batch + (1 - done_batch) * self.gamma * next_q_values
         
-        # Compute MSE loss
-        loss = nn.functional.mse_loss(current_q_values, target_q_values)
+        # Compute loss
+        loss = nn.MSELoss()(current_q_values, target_q_values)
         
         # Optimize the model
         self.optimizer.zero_grad()
         loss.backward()
-        # Clip gradients to prevent exploding gradients
+        # Clip gradients
         torch.nn.utils.clip_grad_norm_(self.policy_net.parameters(), 1.0)
         self.optimizer.step()
     

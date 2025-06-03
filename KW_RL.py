@@ -10,7 +10,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from kw_env import KWIPEnv, KWAndEnv
+from kw_env import KWIPEnv, KWAndEnv, KWVPEnv
 from kw_agent import KWAgent
 
 def setup_logging(output_dir):
@@ -56,8 +56,33 @@ def save_results(log_dir, returns, success_rates, n_bits):
     with open(metadata_file, 'w') as f:
         json.dump(metadata, f, indent=4)
 
+def transfer_weights(old_agent, new_agent):
+    with torch.no_grad():
+        # Get the old and new networks
+        old_net = old_agent.policy_net
+        new_net = new_agent.policy_net
+        
+        # Initialize new LSTM weights with Xavier
+        for layer in range(old_net.lstm.num_layers):
+            # Initialize input-to-hidden weights
+            nn.init.xavier_uniform_(getattr(new_net.lstm, f'weight_ih_l{layer}'))
+            nn.init.zeros_(getattr(new_net.lstm, f'bias_ih_l{layer}'))
+            
+            # Copy hidden-to-hidden weights (these don't depend on input size)
+            setattr(new_net.lstm, f'weight_hh_l{layer}', getattr(old_net.lstm, f'weight_hh_l{layer}'))
+            setattr(new_net.lstm, f'bias_hh_l{layer}', getattr(old_net.lstm, f'bias_hh_l{layer}'))
+        
+        # Initialize output head
+        nn.init.xavier_uniform_(new_net.output_head[0].weight)  # First linear layer in output_head
+        nn.init.zeros_(new_net.output_head[0].bias)
+        nn.init.xavier_uniform_(new_net.output_head[3].weight)  # Second linear layer in output_head
+        nn.init.zeros_(new_net.output_head[3].bias)
+        
+        # Copy target network
+        new_agent.target_net.load_state_dict(new_agent.policy_net.state_dict())
+
 def train_kw_agents(env, n_bits=4, num_episodes=1_000_000, output_dir="results",
-                   eval_interval=10000, min_episodes=5000, prev_agents=None):
+                   eval_interval=10000, min_episodes=5000, prev_agents=None, model_type='LSTM'):
     """Train two agents to play the KW game.
     
     Args:
@@ -71,54 +96,17 @@ def train_kw_agents(env, n_bits=4, num_episodes=1_000_000, output_dir="results",
     """
     # Initialize agents, either from scratch or from previous training
     if prev_agents is None:
-        agents = [KWAgent(n_bits, player_id=i) for i in range(2)]
+        agents = [KWAgent(n_bits, player_id=i, model_type=model_type) for i in range(2)]
     else:
         agents = []
         for i, prev_agent in enumerate(prev_agents):
             # Create new agent with larger n
-            new_agent = KWAgent(n_bits, player_id=i)
-            
-            # Transfer weights from previous network
-            with torch.no_grad():
-                # Get the old and new networks
-                old_net = prev_agent.policy_net.net
-                new_net = new_agent.policy_net.net
-                
-                # For each layer in the new network, except the first and last one (which is the input and output layers)
-                for new_layer, old_layer in zip(new_net[1:-1], old_net[1:-1]): 
-                    if isinstance(new_layer, nn.Linear):
-                        # Get the dimensions
-                        old_in, old_out = old_layer.weight.shape
-                        new_in, new_out = new_layer.weight.shape
-
-                        assert old_in == new_in and old_out == new_out, "Layer dimensions must be the same"
-                        
-                        # Create a new weight tensor with the correct size
-                        new_weights = torch.zeros_like(new_layer.weight.data)
-                        
-                        # Initialize all weights with Xavier initialization first
-                        nn.init.xavier_uniform_(new_weights)
-                        
-                        # Copy the weights that can be transferred. We can assume that the layer dimensions are the same.
-                        new_weights = old_layer.weight.data
-                        
-                        # Assign the new weights
-                        new_layer.weight.data = new_weights
-                        
-                        # Handle bias
-                        if new_layer.bias is not None:
-                            new_bias = torch.zeros_like(new_layer.bias.data)
-                            # Initialize all biases to zero
-                            nn.init.zeros_(new_bias)
-                            # Copy the shared part of the bias
-                            min_bias = min(old_layer.bias.size(0), new_layer.bias.size(0))
-                            new_bias[:min_bias] = old_layer.bias.data[:min_bias]
-                            new_layer.bias.data = new_bias
-            
-            # Copy the same weights to target network
-            new_agent.target_net.load_state_dict(new_agent.policy_net.state_dict())
+            new_agent = KWAgent(n_bits, player_id=i, model_type=model_type)
+            # Transfer weights from previous agent to new agent
+            transfer_weights(prev_agent, new_agent)
             agents.append(new_agent)
 
+            
     # Debug logging for dimensions
     logger.info(f"\nEnvironment observation space shape: {env.observation_space.shape}")
     logger.info(f"Agent 0 observation size: {agents[0].obs_size}")
@@ -313,7 +301,7 @@ if __name__ == "__main__":
     
     # Values of n to try
     n_values = [4, 8]
-    envs = ['AND']
+    envs = ['VP']
     env = None
     num_episodes = 1_000_000
 
@@ -326,6 +314,8 @@ if __name__ == "__main__":
                 env = KWIPEnv(n=n)
             elif env_name == 'AND':
                 env = KWAndEnv(n=n)
+            elif env_name == 'VP':
+                env = KWVPEnv(n=n)
             else:
                 raise ValueError(f"Invalid environment: {env}")
 

@@ -1,0 +1,172 @@
+2025-06-03 11:48:48 - INFO - 
+Environment observation space shape: (31,)
+2025-06-03 11:48:48 - INFO - Agent 0 observation size: 31
+2025-06-03 11:48:48 - INFO - Agent 1 observation size: 31
+2025-06-03 11:48:48 - INFO - Agent 0 action size: 7
+2025-06-03 11:48:48 - INFO - Agent 1 action size: 3
+2025-06-03 11:48:48 - INFO - 
+Using device: cpu
+2025-06-03 11:48:48 - INFO - 
+Starting training for n=4
+2025-06-03 11:48:48 - INFO - Number of episodes: 1000000
+2025-06-03 11:48:48 - INFO - Will continue for 10000 episodes after reaching 99.0% success rate
+2025-06-03 11:48:48 - INFO - Evaluating every 10000 episodes
+2025-06-03 11:48:48 - INFO - 
+==================================================
+2025-06-03 12:03:54 - INFO - 
+Episode 10000/1000000
+2025-06-03 12:03:54 - INFO - Success Rate: 100.0%
+2025-06-03 12:03:54 - INFO - Average Return: 0.603
+2025-06-03 12:03:54 - INFO - ------------------------------
+2025-06-03 12:20:41 - INFO - 
+Reached 99.0% success rate at episode 20000
+2025-06-03 12:20:41 - INFO - Episodes since reaching 99.0%: 0
+2025-06-03 12:20:41 - INFO - 
+Episode 20000/1000000
+2025-06-03 12:20:41 - INFO - Success Rate: 100.0%
+2025-06-03 12:20:41 - INFO - Average Return: 0.847
+2025-06-03 12:20:41 - INFO - ------------------------------
+2025-06-03 12:37:29 - INFO - Episodes since reaching 99.0%: 10000
+2025-06-03 12:37:29 - INFO - 
+Completed 10000 episodes after reaching 99.0% success rate
+2025-06-03 12:37:29 - INFO - 
+=== Episode 1 Transcript ===
+2025-06-03 12:37:29 - INFO - Player 0 sees x: [1 0 1 0]
+2025-06-03 12:37:29 - INFO - Player 1 sees y: [1 0 0 1]
+2025-06-03 12:37:29 - INFO -   Turn 1: Player 0 -> PASS turn
+2025-06-03 12:37:29 - INFO -   Turn 2: Player 1 -> send bit 1
+2025-06-03 12:37:29 - INFO -   Turn 3: Player 1 -> send bit 0
+2025-06-03 12:37:29 - INFO -   Turn 4: Player 1 -> send bit 0
+2025-06-03 12:37:29 - INFO -   Turn 5: Player 1 -> PASS turn
+2025-06-03 12:37:29 - INFO -   Turn 6: Player 0 -> DECIDE index 2
+2025-06-03 12:37:29 - INFO -   → P0 guessed index 2: CORRECT!
+2025-06-03 12:37:29 - INFO - Result: SUCCESS (turns: 6, bits: 3, passes: 2)
+2025-06-03 12:37:29 - INFO - 
+=== Episode 2 Transcript ===
+2025-06-03 12:37:29 - INFO - Player 0 sees x: [1 1 0 1]
+2025-06-03 12:37:29 - INFO - Player 1 sees y: [0 0 1 1]
+2025-06-03 12:37:29 - INFO -   Turn 1: Player 0 -> PASS turn
+2025-06-03 12:37:29 - INFO -   Turn 2: Player 1 -> send bit 0
+2025-06-03 12:37:29 - INFO -   Turn 3: Player 1 -> PASS turn
+2025-06-03 12:37:29 - INFO -   Turn 4: Player 0 -> DECIDE index 1
+2025-06-03 12:37:29 - INFO -   → P0 guessed index 1: CORRECT!
+2025-06-03 12:37:29 - INFO - Result: SUCCESS (turns: 4, bits: 1, passes: 2)
+2025-06-03 12:37:29 - INFO - 
+=== Episode 3 Transcript ===
+2025-06-03 12:37:29 - INFO - Player 0 sees x: [1 0 1 0]
+2025-06-03 12:37:29 - INFO - Player 1 sees y: [1 1 0 0]
+2025-06-03 12:37:29 - INFO -   Turn 1: Player 0 -> PASS turn
+2025-06-03 12:37:29 - INFO -   Turn 2: Player 1 -> send bit 0
+2025-06-03 12:37:29 - INFO -   Turn 3: Player 1 -> send bit 0
+2025-06-03 12:37:29 - INFO -   Turn 4: Player 1 -> PASS turn
+2025-06-03 12:37:29 - INFO -   Turn 5: Player 0 -> DECIDE index 2
+2025-06-03 12:37:29 - INFO -   → P0 guessed index 2: CORRECT!
+2025-06-03 12:37:29 - INFO - Result: SUCCESS (turns: 5, bits: 2, passes: 2)
+2025-06-03 12:37:29 - INFO - 
+=== Episode 4 Transcript ===
+2025-06-03 12:37:29 - INFO - Player 0 sees x: [1 0 1 1]
+2025-06-03 12:37:29 - INFO - Player 1 sees y: [1 0 0 1]
+2025-06-03 12:37:29 - INFO -   Turn 1: Player 0 -> PASS turn
+2025-06-03 12:37:29 - INFO -   Turn 2: Player 1 -> send bit 1
+2025-06-03 12:37:29 - INFO -   Turn 3: Player 1 -> send bit 0
+2025-06-03 12:37:29 - INFO -   Turn 4: Player 1 -> send bit 0
+2025-06-03 12:37:29 - INFO -   Turn 5: Player 1 -> PASS turn
+2025-06-03 12:37:29 - INFO -   Turn 6: Player 0 -> DECIDE index 2
+2025-06-03 12:37:29 - INFO -   → P0 guessed index 2: CORRECT!
+2025-06-03 12:37:29 - INFO - Result: SUCCESS (turns: 6, bits: 3, passes: 2)
+2025-06-03 12:37:29 - INFO - 
+=== Episode 5 Transcript ===
+2025-06-03 12:37:29 - INFO - Player 0 sees x: [0 1 0 1]
+2025-06-03 12:37:29 - INFO - Player 1 sees y: [1 0 0 0]
+2025-06-03 12:37:29 - INFO -   Turn 1: Player 0 -> PASS turn
+2025-06-03 12:37:29 - INFO -   Turn 2: Player 1 -> send bit 0
+2025-06-03 12:37:29 - INFO -   Turn 3: Player 1 -> send bit 0
+2025-06-03 12:37:29 - INFO -   Turn 4: Player 1 -> PASS turn
+2025-06-03 12:37:29 - INFO -   Turn 5: Player 0 -> DECIDE index 3
+2025-06-03 12:37:29 - INFO -   → P0 guessed index 3: CORRECT!
+2025-06-03 12:37:29 - INFO - Result: SUCCESS (turns: 5, bits: 2, passes: 2)
+2025-06-03 12:37:29 - INFO - 
+=== Episode 6 Transcript ===
+2025-06-03 12:37:29 - INFO - Player 0 sees x: [1 1 1 0]
+2025-06-03 12:37:29 - INFO - Player 1 sees y: [1 0 0 0]
+2025-06-03 12:37:29 - INFO -   Turn 1: Player 0 -> PASS turn
+2025-06-03 12:37:29 - INFO -   Turn 2: Player 1 -> send bit 1
+2025-06-03 12:37:29 - INFO -   Turn 3: Player 1 -> send bit 0
+2025-06-03 12:37:29 - INFO -   Turn 4: Player 1 -> PASS turn
+2025-06-03 12:37:29 - INFO -   Turn 5: Player 0 -> DECIDE index 2
+2025-06-03 12:37:29 - INFO -   → P0 guessed index 2: CORRECT!
+2025-06-03 12:37:29 - INFO - Result: SUCCESS (turns: 5, bits: 2, passes: 2)
+2025-06-03 12:37:29 - INFO - 
+=== Episode 7 Transcript ===
+2025-06-03 12:37:29 - INFO - Player 0 sees x: [1 1 0 1]
+2025-06-03 12:37:29 - INFO - Player 1 sees y: [0 0 1 1]
+2025-06-03 12:37:29 - INFO -   Turn 1: Player 0 -> PASS turn
+2025-06-03 12:37:29 - INFO -   Turn 2: Player 1 -> send bit 0
+2025-06-03 12:37:29 - INFO -   Turn 3: Player 1 -> PASS turn
+2025-06-03 12:37:29 - INFO -   Turn 4: Player 0 -> DECIDE index 1
+2025-06-03 12:37:29 - INFO -   → P0 guessed index 1: CORRECT!
+2025-06-03 12:37:29 - INFO - Result: SUCCESS (turns: 4, bits: 1, passes: 2)
+2025-06-03 12:37:29 - INFO - 
+=== Episode 8 Transcript ===
+2025-06-03 12:37:29 - INFO - Player 0 sees x: [1 1 0 1]
+2025-06-03 12:37:29 - INFO - Player 1 sees y: [0 0 0 0]
+2025-06-03 12:37:29 - INFO -   Turn 1: Player 0 -> PASS turn
+2025-06-03 12:37:29 - INFO -   Turn 2: Player 1 -> send bit 0
+2025-06-03 12:37:29 - INFO -   Turn 3: Player 1 -> PASS turn
+2025-06-03 12:37:29 - INFO -   Turn 4: Player 0 -> DECIDE index 1
+2025-06-03 12:37:29 - INFO -   → P0 guessed index 1: CORRECT!
+2025-06-03 12:37:29 - INFO - Result: SUCCESS (turns: 4, bits: 1, passes: 2)
+2025-06-03 12:37:29 - INFO - 
+=== Episode 9 Transcript ===
+2025-06-03 12:37:29 - INFO - Player 0 sees x: [1 0 1 0]
+2025-06-03 12:37:29 - INFO - Player 1 sees y: [0 0 1 0]
+2025-06-03 12:37:29 - INFO -   Turn 1: Player 0 -> PASS turn
+2025-06-03 12:37:29 - INFO -   Turn 2: Player 1 -> send bit 0
+2025-06-03 12:37:29 - INFO -   Turn 3: Player 1 -> PASS turn
+2025-06-03 12:37:29 - INFO -   Turn 4: Player 0 -> DECIDE index 0
+2025-06-03 12:37:29 - INFO -   → P0 guessed index 0: CORRECT!
+2025-06-03 12:37:29 - INFO - Result: SUCCESS (turns: 4, bits: 1, passes: 2)
+2025-06-03 12:37:29 - INFO - 
+=== Episode 10 Transcript ===
+2025-06-03 12:37:29 - INFO - Player 0 sees x: [1 0 1 1]
+2025-06-03 12:37:29 - INFO - Player 1 sees y: [0 1 1 0]
+2025-06-03 12:37:29 - INFO -   Turn 1: Player 0 -> PASS turn
+2025-06-03 12:37:29 - INFO -   Turn 2: Player 1 -> send bit 1
+2025-06-03 12:37:29 - INFO -   Turn 3: Player 1 -> PASS turn
+2025-06-03 12:37:29 - INFO -   Turn 4: Player 0 -> DECIDE index 3
+2025-06-03 12:37:29 - INFO -   → P0 guessed index 3: CORRECT!
+2025-06-03 12:37:29 - INFO - Result: SUCCESS (turns: 4, bits: 1, passes: 2)
+2025-06-03 12:37:31 - INFO - 
+=== Evaluation Summary ===
+2025-06-03 12:37:31 - INFO - Success rate: 99.9% (1997/2000)
+2025-06-03 12:37:31 - INFO - Average episode length: 4.6 turns
+2025-06-03 12:37:31 - INFO - Average bits communicated: 1.6 bits
+2025-06-03 12:37:31 - INFO - Average passes per episode: 2.0 passes
+2025-06-03 12:37:31 - INFO - 
+Communication Analysis:
+2025-06-03 12:37:31 - INFO -   Average bits per turn: 0.3
+2025-06-03 12:37:31 - INFO - 
+Environment observation space shape: (59,)
+2025-06-03 12:37:31 - INFO - Agent 0 observation size: 59
+2025-06-03 12:37:31 - INFO - Agent 1 observation size: 59
+2025-06-03 12:37:31 - INFO - Agent 0 action size: 11
+2025-06-03 12:37:31 - INFO - Agent 1 action size: 3
+2025-06-03 12:37:31 - INFO - 
+Using device: cpu
+2025-06-03 12:37:31 - INFO - 
+Starting training for n=8
+2025-06-03 12:37:31 - INFO - Number of episodes: 1000000
+2025-06-03 12:37:31 - INFO - Will continue for 10000 episodes after reaching 99.0% success rate
+2025-06-03 12:37:31 - INFO - Evaluating every 10000 episodes
+2025-06-03 12:37:31 - INFO - 
+==================================================
+2025-06-03 12:49:11 - INFO - 
+Episode 10000/1000000
+2025-06-03 12:49:11 - INFO - Success Rate: 75.9%
+2025-06-03 12:49:11 - INFO - Average Return: 0.214
+2025-06-03 12:49:11 - INFO - ------------------------------
+2025-06-03 13:07:50 - INFO - 
+Episode 20000/1000000
+2025-06-03 13:07:50 - INFO - Success Rate: 89.2%
+2025-06-03 13:07:50 - INFO - Average Return: 0.470
+2025-06-03 13:07:50 - INFO - ------------------------------
