@@ -10,7 +10,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from kw_env import KWIPEnv, KWAndEnv, KWVPEnv
+from rl_environments.kw_env import KWIPEnv, KWAndEnv, KWVPEnv, KWAndFourierEnv
 from kw_agent import KWAgent
 
 def setup_logging(output_dir):
@@ -31,12 +31,12 @@ def setup_logging(output_dir):
     
     return logging.getLogger(__name__)
 
-def save_results(log_dir, returns, success_rates, n_bits):
+def save_results(log_dir, returns, success_rates, n_bits, name):
     """Save training results to files"""
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     
     # Save returns
-    returns_file = os.path.join(log_dir, f"returns_{timestamp}.npy")
+    returns_file = os.path.join(log_dir, f"returns_{timestamp}_{name}.npy")
     np.save(returns_file, np.array(returns))
     
     # Save success rates
@@ -46,6 +46,7 @@ def save_results(log_dir, returns, success_rates, n_bits):
     # Save metadata
     metadata = {
         "n_bits": n_bits,
+        "name": name,
         "timestamp": timestamp,
         "final_success_rate": success_rates[-1] if success_rates else None,
         "final_return": returns[-1] if returns else None,
@@ -96,12 +97,12 @@ def train_kw_agents(env, n_bits=4, num_episodes=1_000_000, output_dir="results",
     """
     # Initialize agents, either from scratch or from previous training
     if prev_agents is None:
-        agents = [KWAgent(n_bits, player_id=i, model_type=model_type) for i in range(2)]
+        agents = [KWAgent(env, n_bits, player_id=i, model_type=model_type) for i in range(2)]
     else:
         agents = []
         for i, prev_agent in enumerate(prev_agents):
             # Create new agent with larger n
-            new_agent = KWAgent(n_bits, player_id=i, model_type=model_type)
+            new_agent = KWAgent(env, n_bits, player_id=i, model_type=model_type)
             # Transfer weights from previous agent to new agent
             transfer_weights(prev_agent, new_agent)
             agents.append(new_agent)
@@ -122,7 +123,7 @@ def train_kw_agents(env, n_bits=4, num_episodes=1_000_000, output_dir="results",
     high_performance_episode = None
     episodes_after_high_performance = 0
     target_success_rate = 0.99
-    episodes_to_continue = 10000
+    episodes_to_continue = 100
 
     # Log device information
     device = agents[0].device
@@ -301,9 +302,11 @@ if __name__ == "__main__":
     
     # Values of n to try
     n_values = [4, 8]
-    envs = ['VP']
+    envs = ['IP']
     env = None
-    num_episodes = 1_000_000
+    num_episodes = 100_000
+
+    name = f"n{n_values[0]}_env{envs[0]}_episodes{num_episodes}"
 
     for env_name in envs:   
         # Keep track of previously trained agents for curriculum learning
@@ -314,6 +317,8 @@ if __name__ == "__main__":
                 env = KWIPEnv(n=n)
             elif env_name == 'AND':
                 env = KWAndEnv(n=n)
+            elif env_name == 'AND_FOURIER':
+                env = KWAndFourierEnv(n=n)
             elif env_name == 'VP':
                 env = KWVPEnv(n=n)
             else:
@@ -334,13 +339,13 @@ if __name__ == "__main__":
                 n_bits=n,
                 num_episodes=num_episodes,
                 output_dir=output_dir,
-                eval_interval=10000, 
+                eval_interval=500, 
                 min_episodes=10000,
                 prev_agents=prev_agents
             )
             
             # Save results
-            save_results(output_dir, returns, success_rates, n)
+            save_results(output_dir, returns, success_rates, n, name)
 
             # Final evaluation
             final_success_rate = evaluate_agents(env, trained_agents, episodes=2000, verbose=True, show_transcripts=10)

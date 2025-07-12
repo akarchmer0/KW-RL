@@ -84,13 +84,14 @@ class ReplayBuffer:
         return len(self.buffer)
 
 class KWAgent:
-    def __init__(self, n, player_id, model_type='LSTM', lr=3e-4, ucb_c=2.0):
+    def __init__(self, env, n, player_id, model_type='LSTM', lr=3e-4, ucb_c=2.0):
         self.n = n
+        self.env = env
         self.player_id = player_id
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
         # Calculate observation size (same for both players)
-        self.obs_size = n + (2 * n + 1) * 3
+        self.obs_size = env.observation_space.shape[0]
         
         # ASYMMETRIC ACTION SPACES
         if player_id == 0:
