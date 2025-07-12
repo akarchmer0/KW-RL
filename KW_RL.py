@@ -302,7 +302,7 @@ if __name__ == "__main__":
     
     # Values of n to try
     n_values = [4, 8]
-    envs = ['IP']
+    envs = ['AND']
     env = None
     num_episodes = 100_000
 
@@ -339,7 +339,7 @@ if __name__ == "__main__":
                 n_bits=n,
                 num_episodes=num_episodes,
                 output_dir=output_dir,
-                eval_interval=500, 
+                eval_interval=5000, 
                 min_episodes=10000,
                 prev_agents=prev_agents
             )

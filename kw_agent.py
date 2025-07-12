@@ -30,7 +30,7 @@ class DQN(nn.Module):
         return self.net(x)
     
 class LSTMQNetwork(nn.Module):
-    def __init__(self, input_size: int, action_size: int, hidden_size: int = 256, num_layers: int = 2):
+    def __init__(self, input_size: int, action_size: int, hidden_size: int = 128, num_layers: int = 1):
         super().__init__()
         self.input_size = input_size
         self.hidden_size = hidden_size

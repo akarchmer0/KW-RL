@@ -168,8 +168,8 @@ class KWAndEnv(gym.Env):
 
         else:
             # Player sends a bit (0 or 1)
-            # Turn stays with same player - they can speak again!
-            rewards = [0.05 * self.t, 0.05 * self.t]  # Remove the negative sign
+            # Turn stays with same player, they can speak again!
+            rewards = [-0.02 * self.t, -0.02 * self.t] 
 
         # Timeout penalty
         if not self.done and self.t >= self.max_len:
