@@ -1,5 +1,4 @@
 .claude
 .venv
 results/
-rl_environments/
 kwrl_env/
